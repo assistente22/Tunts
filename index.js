@@ -6,32 +6,39 @@ const filename = 'tunts.xlsx'
 const wb = new excel.Workbook();
 const ws = wb.addWorksheet('sheet');
 
-ws.mergeCells('A1:D1')
+//configuring cells
 
-ws.getColumn('A').alignment = {wrapText: true}
-ws.getColumn('B').alignment = {wrapText: true}
-ws.getColumn('C').alignment = {wrapText: true}
-ws.getColumn('D').alignment = {wrapText: true}
+ws.mergeCells('A1:D1') //merging title cell
 
-ws.getColumn('C').numFmt = '0,0.00'
+const columnA = ws.getColumn('A') //name column
+const columnB = ws.getColumn('B') //capital column
+const columnC = ws.getColumn('C') //area column
+const columnD = ws.getColumn('D') //currencies column
+const cellTitle = ws.getCell('A1') //title cell
+
+columnA.alignment = {wrapText: true}
+columnB.alignment = {wrapText: true}
+columnC.alignment = {wrapText: true}
+columnD.alignment = {wrapText: true}
+
+columnC.numFmt = '0,0.00'
   
-ws.getCell('A1').font = { 
+cellTitle.font = { 
     color: '#4F4F4F',
     size: 16,
     bold: true
 }
 
-
-ws.getCell('A1').alignment = {
+cellTitle.alignment = {
     vertical: 'middle',
     horizontal:'center',
 }
 
-ws.getCell('A1').value = 'Countries List'
+cellTitle.value = 'Countries List'
 
 
 ws.getRow(2).font = {
-    color: '#808080',
+    color: {argb: "#808080"},
     size: 12,
     bold: true
 }
@@ -40,16 +47,15 @@ ws.getCell('A2').value = 'Name'
 ws.getCell('B2').value = 'Capital'
 ws.getCell('C2').value = 'Area'
 ws.getCell('D2').value = 'Currencies'
-ws.getColumn('A').width = 15
-ws.getColumn('B').width = 15
-ws.getColumn('C').width = 15
-ws.getColumn('D').width = 15
-
+columnA.width = 15
+columnB.width = 15
+columnC.width = 15
+columnD.width = 15
 
 
 let url = "https://restcountries.com/v3.1/all";
 
-https.get(url,(res) => {
+https.get(url,(res) => { //http request to api
     let body = "";
 
     res.on("data", (chunk) => {
@@ -60,10 +66,10 @@ https.get(url,(res) => {
         try {
             let json = JSON.parse(body);
 
-            for(let i = 3; i< Object.keys(json).length +3; i++){
+            for(let i = 3; i< Object.keys(json).length +3; i++){ //parsing the json and setting values on the cells
                 ws.getCell('A' + i).value = json[i-3]['name']['common']
 
-                try{
+                try{ //if the value is undefined insert - in the cell
                     ws.getCell('B' + i).value = Object.values(json[i-3]['capital'])[0]
                 }
                 catch(err){
@@ -74,7 +80,7 @@ https.get(url,(res) => {
 
                 try{
                     let currenciesString = ''
-                    for(let o = 0; o< Object.keys(json[i-3]['currencies']).length; o++){
+                    for(let o = 0; o< Object.keys(json[i-3]['currencies']).length; o++){ // formatting the currencies
                         if(o == Object.keys(json[i-3]['currencies']).length-1){currenciesString = currenciesString + Object.keys(json[i-3]['currencies'])[o]}
                         else{ currenciesString = currenciesString + Object.keys(json[i-3]['currencies'])[o] + ", "}
                     }
@@ -85,7 +91,7 @@ https.get(url,(res) => {
                 }
             }
 
-            wb.xlsx.writeFile(filename)
+            wb.xlsx.writeFile(filename) //saving the xlsx file
 
 
             .then(() => {
